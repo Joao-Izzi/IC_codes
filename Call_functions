@@ -1,0 +1,62 @@
+# I utilize this code just to call the different functions that I created 
+library(RTransferEntropy)
+######################################################################################
+######################################################################################
+ent_trans_rep <- function(cadeia,tamanho,memoria,B){
+  a <- vector()
+  b <- vector()
+  for (i in 1:B){
+    a[i] <- entropia_transferencia(cadeia[,i][1:tamanho], cadeia[,i][(tamanho+1):(2*tamanho)],memoria)
+    b[i] <- entropia_transferencia(cadeia[,i][(tamanho+1):(2*tamanho)], cadeia[,i][1:tamanho],memoria)
+
+  }
+  c<- matrix(c(a,b),nrow = B,ncol = 2, byrow = FALSE)
+  return(c)
+}
+
+e <- ent_trans_rep(Z1,5000,3,100)
+
+'Cadeia refers that to the chains you are going to calculate the transfer entropy
+for this function work you need to put the sequence from neuron X and neuron Y
+in the same vector, like if X has lenght = 5000 and Y has lenght = 5000, then you need
+to create a vector which has the 5000 spikes from X and the 5000 spikes from Y.'
+'The second thing is that you put the lenght of one chain of spikes so in this case
+is 5000.'
+'The third thing is the memory so in this case the memory is 3'
+'The last one brings the number of cases i am testing'
+
+###############################################################################
+##################### Calls the function for b samples #############################
+
+# in This case we are getting B samples of lenght t, where the each sample
+#is being save in a vector, I recommend using dim(Y) to see how the vector is saved
+#but basically you can find a chain of spikes like
+#Y[,1][1:t] is the sequence o X of the first sample
+#Y[,1][t+1:2t] is the sequence of Y of the first sample
+#Y[,2][1:t] is the sequence of X of the second sample
+
+gera_cadeias_variavel <- function(B,t,X,Y){
+  for (i in 1:B){
+    X <- gera_cadeia_2(X)
+    X1 <- matrix(0, nrow = n, ncol = t+4-2500)
+    for (j in 1:n){
+      X1[j,] <- X[j,][2501:(t+4)]
+    }
+    Y[,i][1 : length(X1[1,])] <- X1[1,]
+    Y[,i][(length(X1[1,]) +1) : (2*(length(X1[1,])))] <- X1[2,]
+  }
+  return(Y)
+}
+
+B = 100
+set.seed(1)
+n=2
+w = matrix(c(     0,    10,
+                  0,     0), nrow=n,ncol=n, byrow = T)
+alpha <- c(0, 0)
+t= 39996 + 2500 #colocar T - 4
+X <- matrix(c(1, 0, 0, 1,
+              0, 1, 1, 0), nrow = n, byrow = TRUE)
+X <- cbind(X, matrix(0, nrow = n, ncol = t))
+
+Z <- matrix(data = NA, nrow = 2*(t+4-2500), ncol = B)
